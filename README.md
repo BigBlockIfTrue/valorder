@@ -70,12 +70,12 @@ host:
 
 ```
 Natural:
-Counter({'local_reads': 31949, 'local_writes': 29958, 'global_writes': 11991})
+Counter({'local_writes': 30053, 'local_reads': 24896, 'global_writes': 4843})
 Lexicographic:
-Counter({'local_reads': 43526, 'local_writes': 29958, 'global_writes': 23568})
+Counter({'local_writes': 30053, 'local_reads': 24896, 'global_writes': 4843})
 ```
 
-which demonstrates that there *might* be ways to avoid costly traffic to
-the global UTXO table.
+which demonstrates that the transaction order does not matter for this
+block validation algorithm.
 
 Which is all which I like to point out with this. (So far)

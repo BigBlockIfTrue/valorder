@@ -24,16 +24,12 @@ assert N_BLOCK % n_workers == 0
 # proposed for doing validation exploiting the DAG property and update the stats for
 # global vs. local UTXO accesses.
 
-def OTI_Worker_processOutputs(global_utxo, chunk):
-    local_utxo = {}
-
+def OTI_Worker_processOutputs(global_utxo, local_utxo, chunk):
     for txid, inputs, outputs in chunk:
         # Note: no explicit output loop here as outputs are simply abstracted as an integer
         # save into local set
         stats["local_writes"]+=1
         local_utxo[txid] = outputs
-
-    return local_utxo
 
 def OTI_Worker_processInputs(global_utxo, local_utxo, chunk):
     for txid, inputs, outputs in chunk:
@@ -67,15 +63,14 @@ def ValidateOutsThenIns(utxo, block):
 
     chunks = [block[i * chunk_size : (i+1) * chunk_size] for i in range(n_workers)]
 
-    local_utxos=[]
+    local_utxo={}
     for chunk in chunks:
-        local_utxos.append(OTI_Worker_processOutputs(utxo, chunk))
+        OTI_Worker_processOutputs(utxo, local_utxo, chunk)
 
-    for local_utxo, chunk in zip(local_utxos, chunks):
+    for chunk in chunks:
         OTI_Worker_processInputs(utxo, local_utxo, chunk)
 
-    for local_utxo in local_utxos:
-        OTI_Worker_Commit(utxo, local_utxo)
+    OTI_Worker_Commit(utxo, local_utxo)
 
     for k in list(utxo.keys()):
         if utxo[k] == 0:
